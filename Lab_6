@@ -1,0 +1,38 @@
+import numpy as np
+import pandas as pd
+
+raw = {
+    "age": [25, "N/A", 40, 33, "?"],
+    "income": [50000, 60000, None, "unknown", 80000],
+    "churned": [0, 1, 0, 1, 0],
+}
+df_raw = pd.DataFrame(raw)
+
+missing_tokens = ["N/A", "NA", "unknown", "?", "not reported"]
+df = df_raw.replace(missing_tokens, np.nan)
+
+df["age"] = pd.to_numeric(df["age"])
+df["income"] = pd.to_numeric(df["income"])
+
+col_m = df.isnull().mean() * 100
+row_m = df.isnull().sum(axis=1)
+
+df_a = df.dropna(subset=["age", "income"])
+
+df_b = df.copy()
+df_b["age_m"] = df_b["age"].isnull().astype(int)
+df_b["income_m"] = df_b["income"].isnull().astype(int)
+df_b["age"] = df_b["age"].fillna(df_b["age"].mean())
+df_b["income"] = df_b["income"].fillna(df_b["income"].mean())
+
+
+print("DataFrame")
+print(df)
+print("\nColumn Missing Percentage")
+print(col_m)
+print("\nRow Missing Count")
+print(row_m)
+print("\n--- VERSION A (DROP) ---")
+print(df_a)
+print("\n--- VERSION B (IMPUTE) ---")
+print(df_b)
