@@ -1,0 +1,24 @@
+import numpy as np
+import pandas as pd
+
+np.random.seed(10)
+v = np.concatenate([np.random.lognormal(10, 0.5, 1000), [1e7, 2e7]])
+df = pd.DataFrame({"inc": v})
+
+# IQR
+q1, q3 = df['inc'].quantile([0.25, 0.75])
+iqr = q3 - q1
+low, high = q1 - 1.5 * iqr, q3 + 1.5 * iqr
+iqr_out = df[(df['inc'] < low) | (df['inc'] > high)]
+
+# z-score
+z = (df['inc'] - df['inc'].mean()) / df['inc'].std()
+z_out = df[z.abs() > 3]
+
+df['cap'] = df['inc'].clip(low, high)
+df['log'] = np.log1p(df['inc'])
+
+print(f"IQR Outliers: {len(iqr_out)}")
+print(f"Z Outliers:   {len(z_out)}")
+print("\nMeans Comparison:")
+print(df[['inc', 'cap', 'log']].mean())
