@@ -1,0 +1,34 @@
+import pandas as pd
+
+train = pd.DataFrame({
+    "age": [25, None, 40, 33],
+    "city": ["NY", "SF", None, "NY"],
+})
+test = pd.DataFrame({
+    "age": [None, 50],
+    "city": ["SF", None],
+})
+
+def fit_imp(df, nc, cc):
+    p = {c: df[c].median() for c in nc}
+    p.update({c: df[c].mode()[0] for c in cc})
+    return p
+
+def tr_imp(df, p, ind=False):
+    d = df.copy()
+    for c, v in p.items():
+        if ind:
+            d[f'{c}_m'] = d[c].isna().astype(int)
+        d[c] = d[c].fillna(v)
+    return d
+
+nc, cc = ['age'], ['city']
+p = fit_imp(train, nc, cc)
+
+d1 = tr_imp(test, p, ind=True)
+d2 = tr_imp(test, p, ind=False)
+
+print("With Indicators:")
+print(d1)
+print("\nWithout:")
+print(d2)
